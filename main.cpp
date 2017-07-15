@@ -107,7 +107,7 @@ void test (const u_char *packets,bpf_u_int32 lens)
                     printf("DATA \n");
              //   char aaa[100];
                 //itoa(*(packets+i),aaa,10);
-                printf("%c ",*(packets+i));
+                printf("%c",*(packets+i));
                 if(i!=0 && (i&7==0))
                     cout<<endl;
             }
@@ -122,6 +122,7 @@ void test (const u_char *packets,bpf_u_int32 lens)
    {
         cout<<"don't use ip "<<endl;
    }
+   cout<< "------------------------------------------------------------"<<endl<<endl;
    delete eths;
    delete ips;
    delete tcps;
