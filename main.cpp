@@ -51,16 +51,18 @@ public:
     const unsigned char* destination;       const u_char *packet;		/* The actual packet */
 
     const unsigned char* source;
-
+    int num1;
+    int num2;
+    int num3=0,num4=0;
     void print(void)
     {
         printf("tcp destination ");
        // for(int i=0;i<2;i++)
-        int num1=pow(2,4);
+        num1=pow(2,4);
         num1*=*(destination);
-        int num2=*(destination+1);
+        num2=*(destination+1);
             printf(": %d",num1+num2);
-
+        num4=num1+num2;
         cout<<endl;
         printf("tcp source ");
       //  for(int i=0;i<2;i++)
@@ -69,6 +71,7 @@ public:
         num2=*(source+1);
             printf(": %d",num1+num2);
         cout<<endl;
+        num3=num1+num2;
     }
 };
 
@@ -101,7 +104,9 @@ void test (const u_char *packets,bpf_u_int32 lens)
             tcps->print();
             packets+=20;
             int i=0;
-            for(i=0;i<lens-54;i++)
+           // if(tcps->num3==80 || tcps->num4==80)
+           // {
+           /* for(i=0;i<lens-54;i++)
             {
                 if(i==0)
                     printf("DATA \n");
@@ -110,7 +115,15 @@ void test (const u_char *packets,bpf_u_int32 lens)
                 printf("%c",*(packets+i));
                 if(i!=0 && (i&7==0))
                     cout<<endl;
-            }
+            }*/
+                if(lens-53>0)
+                {
+                       printf("DATA \n");
+                printf("%s",packets);
+
+                 i=1;
+                }
+            //}
             if(i==0)
                 printf("No DATA \n");
             cout<<endl;
@@ -160,7 +173,7 @@ int main()
 
 while(1)
 {
-    const u_char *packet;		/* The actual packet */
+    /* The actual packet */
 
     handle = pcap_open_live("ens33", BUFSIZ, 1, 1000, errbuf);//피캣오픈픈
     if (handle == NULL) {
@@ -178,6 +191,9 @@ while(1)
     }
     /* Grab a packet */
 //    const u_char *packet;		/* The actual packet */
+    while(1)
+    {
+        const u_char *packet;
    while((res = pcap_next_ex(handle, &header,&packet)) >= 0){
 
        if(res == 0)
@@ -201,8 +217,8 @@ while(1)
                  test(packet,header->len);
 
            }
-
-
+        //    delete packet;
+    break;
 
    }
 
@@ -211,7 +227,7 @@ while(1)
        return -1;
 
    }
-           //패킷의 길이와 헤더정보가 넘어오고 pcap_next의 리턴 값이 바로 패킷이다 이더넷부터 쭉쭉 다있는 것 이 것이용 6바이트 6바이트출력해서 값얻어냄 분석시작
+    }       //패킷의 길이와 헤더정보가 넘어오고 pcap_next의 리턴 값이 바로 패킷이다 이더넷부터 쭉쭉 다있는 것 이 것이용 6바이트 6바이트출력해서 값얻어냄 분석시작
     //0x08로 뒤에 얹혀지는게 ip인거알아내면 또 읽어들여서 뒤에 바이트가지고, 분석 그다음 또 프로토콜로 다음올라가는거 확인 데이터부분은 앞의 10byte만출력
     //pcap_next는 타임아웃인지 못받은건지 알 수 없다 다 null만나옴 때문에 pcap_next_exe이걸 사용하면 타임아웃인지 아님 fail로못받은건지 오류의원인을 알수있다.
     /* Print its length */
