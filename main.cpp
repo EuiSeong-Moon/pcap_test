@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
+#include <ctype.h>
+#include <cstdio>
 using namespace std;
 class Eths
 {
@@ -14,18 +16,6 @@ public:
     uint8_t source[6];
     uint16_t eth_type;
 };
-/*    void print(void)
-    {
-        printf("eth.dmac ");
-        for(int i=0;i<6;i++)
-            printf(": %02x",*(destination+i));
-        cout<<endl;
-        printf("eth.smac ");
-        for(int i=0;i<6;i++)
-            printf(": %02x",*(source+i));
-        cout<<endl;
-    }
-};*/
 
 class IPs
 {
@@ -40,20 +30,7 @@ public:
     uint32_t destination;
     uint32_t source;
 };
-/*    const unsigned char* pickip;
 
-    void print(void)
-    {
-        printf("ip destination ");
-        for(int i=0;i<4;i++)
-            printf(": %d. ",*(destination+i));
-        cout<<endl;
-        printf("ip source ");
-        for(int i=0;i<4;i++)
-            printf(": %d. ",*(source+i));
-        cout<<endl;
-    }
-};*/
 class Tcps
 {
 public:
@@ -66,87 +43,9 @@ public:
     uint8_t skip;
     uint16_t windows;
 };
-/*
-    void print(void)
-    {
-        printf("tcp destination ");
-        // for(int i=0;i<2;i++)
-        num1=pow(2,4);
-        num1*=*(destination);
-        num2=*(destination+1);
-        printf(": %d",num1+num2);
-        num4=num1+num2;
-        cout<<endl;
-        printf("tcp source ");
-        //  for(int i=0;i<2;i++)
-        num1=pow(2,4);
-        num1*=*(source);
-        num2=*(source+1);
-        printf(": %d",num1+num2);
-        cout<<endl;
-        num3=num1+num2;
-    }
-};*/
-
-/*void test (const u_char *packets,bpf_u_int32 lens)
-{
-    if(packets!=NULL)
-    {
-        Eths* eths=new Eths;
-        IPs* ips=new IPs;
-        Tcps* tcps=new Tcps;
-        //strncpy(eths->destination,packets,6);
-        eths->destination=packets;
-        eths->source=(packets+=6);
-        eths->pickip=(packets+=6);
 
 
-        eths->print();
-        if((*(eths->pickip))==128)
-            cout<<"dd";
-        if((*(eths->pickip))==8 && (*(eths->pickip+1)==0))
-        {
-            ips->destination=(packets+=18);
-            ips->source=(packets-=4);
-            ips->pickip=(packets-=3);
-            ips->print();
-            if(*(ips->pickip)==6)
-            {
-                tcps->source=(packets+=11);
-                tcps->destination=(packets+=2);
-                tcps->print();
-                packets+=20;
-                int i=0;
-                // if(tcps->num3==80 || tcps->num4==80)
-                // {
-
-                if(lens-53>0)
-                {
-                    printf("DATA \n");
-                    printf("%s",packets);
-
-                    i=1;
-                }
-                //}
-                if(i==0)
-                    printf("No DATA \n");
-                cout<<endl;
-            }
-            else
-                cout<<"don't use tcp"<<endl;
-        }
-        else
-        {
-            cout<<"don't use ip "<<endl;
-        }
-        cout<< "------------------------------------------------------------"<<endl<<endl;
-        delete eths;
-        delete ips;
-        delete tcps;
-    }
-}*/
-
-int main(int argc,char* argv[])
+int main(int argc,char** argv)
 {
     char timestr[16];
     struct tm *ltime;
@@ -162,19 +61,7 @@ int main(int argc,char* argv[])
     struct pcap_pkthdr *header;	/* The header that pcap gives us */
 
     /* Define the device */
-    dev = pcap_lookupdev(errbuf);//인터페이스 얻어오기
-    if (dev == NULL) {
-        fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
-        return(2);
-    }
-    /* Find the properties for the device */
-    /* if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) {
-        fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
-        net = 0;
-        mask = 0;
-    }*/
-    /* Open the session in promiscuous mode */
-
+    // dev=argv[1];
     while(1)
     {
         /* The actual packet */
@@ -184,8 +71,7 @@ int main(int argc,char* argv[])
             fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
             return(2);
         }
-        /* Compile and apply the filter */      //원하는 패킷만 잡기위해 필터링하는 함수로 pcap_compile,pcap_setfilter이용한다.
-        /* if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
+        if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
             fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
             return(2);
         }
@@ -193,8 +79,8 @@ int main(int argc,char* argv[])
             fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
             return(2);
         }
-        /* Grab a packet */
-        //    const u_char *packet;		/* The actual packet */
+
+
         while(1)
         {
             char* buf;
@@ -209,119 +95,106 @@ int main(int argc,char* argv[])
                     continue;
 
 
-                printf("Packet infromation len : %d\n",header->len);
+                //  printf("Packet infromation len : %d\n",header->len);
 
                 if(packet!=NULL)
                 {
                     eths=(Eths*)packet;
                     int datastart=14;
-                    /*  cout<<"Eth destination :";
-                    for(int i=0;i<6;i++)
-                        printf("%02x ",eths->destination[i]);
-                    cout<<endl<<"Eth source :";
-                    for(int i=0;i<6;i++)
-                        printf("%02x ",eths->source[i]);
-                    cout<<endl;*/
+
                     if(eths->eth_type==8)
                     {
                         ips=(IPs*)(packet+14);
                         uint8_t a=(ips->header)&0x0F;
 
-                        // inet_ntop(AF_INET, &a, buf, sizeof(1));
-                        // int ipsize=atoi(buf);
                         int ipsize=4*a;
+                        tcps=(Tcps*)(packet+ipsize+14);
+
+
 
                         datastart+=ipsize;
-                        /*     cout<<"IP destination :";
-                        for(int i=0;i<4;i++)
-                        {
-                            inet_ntop(AF_INET,&ips->destination[i],buf,8);
-                            printf("%s.",buf);
-                        }
-                        cout<<endl<<"IP Soure :";
-                        for(int i=0;i<4;i++)
-                        {
-                            inet_ntop(AF_INET,&ips->source[i],buf,8);
-                            printf("%s.",buf);
-                        }
-                        cout<<endl;*/
+
 
                         if(ips->protocol==0x06)
                         {
-                            cout<<"Eth destination :";
-                            for(int i=0;i<6;i++)
-                                printf("%02x ",eths->destination[i]);
-                            cout<<endl<<"Eth source :";
-                            for(int i=0;i<6;i++)
-                                printf("%02x ",eths->source[i]);
-                            cout<<endl;
+
+                            if(ntohs(tcps->source)==80 || ntohs(tcps->destination)==80)
+                            {
+
+                                cout<<"Eth destination :";
+                                for(int i=0;i<6;i++)
+                                    printf("%02x ",eths->destination[i]);
+                                cout<<endl<<"Eth source :";
+                                for(int i=0;i<6;i++)
+                                    printf("%02x ",eths->source[i]);
+                                cout<<endl;
 
 
-                            cout<<"IP destination :";
-                            // for(int i=0;i<4;i++)
-                            // {
-                            //char buf2[100];
-                            buf=(char*)malloc(32);
-                            //  printf("ccc %02x\n",ips->destination[i]);
-                            inet_ntop(AF_INET,&ips->destination,buf,32);
-                            printf("%s.",buf);
-                            free(buf);
-                            // }
-                            cout<<endl<<"IP Soure :";
-                           // for(int i=0;i<4;i++)
-                         //   {
+                                cout<<"IP destination :";
+
+                                buf=(char*)malloc(32);
+
+                                inet_ntop(AF_INET,&ips->destination,buf,32);
+                                printf("%s.",buf);
+                                free(buf);
+
+                                cout<<endl<<"IP Soure :";
+
                                 buf=(char*)malloc(32);
                                 inet_ntop(AF_INET,&ips->source,buf,32);
                                 printf("%s.\n",buf);
                                 free(buf);
-                         //   }
 
 
 
-                            tcps=(Tcps*)(packet+ipsize+14);
-                         //   printf("ddd : %02x\n",tcps->offset);
-                            uint8_t av=(tcps->offset)>>4;
-                           //         printf("after : %02",av);
-                            av=av&0x0F;
 
-                            int tcpsize=av*4;
-                           // printf("\n%d\n",tcpsize);
-                          //  tcpsize=tcpsize*4;
-                            datastart+=tcpsize;
-                            buf=(char*)malloc(16);
-                            inet_ntop(AF_INET,&tcps->source,buf,16);
-                            printf("TCP source port : %d \n",ntohs(tcps->source));
-                            free(buf);
-                            buf=(char*)malloc(16);
-                            inet_ntop(AF_INET,&tcps->destination,buf,16);
+                                uint8_t av=(tcps->offset)>>4;
 
-                            printf("TCP destination port : %d\n",ntohs(tcps->destination));
-                            free(buf);
-                           if(ntohs(tcps->source)==80 || ntohs(tcps->destination)==80)
-                            {
-                               // buf=(char*)malloc(16);
-                              // inet_ntop(AF_INET,&ips->total,buf,16);
-                              //  printf("test :%s\n",buf);
-                                int datasizes=ntohs(ips->total);
-                               // printf("dfdfd %d \n",ips->total);
-                              //  printf("ip size : %d",ipsize);
-                              //  printf("des size : %d \n",tcpsize);
+                                av=av&0x0F;
 
-                                datasizes-=ipsize;
-                                datasizes-=tcpsize;
-                                if(datasizes<0)
-                                    datasizes=0;
-                           //     printf("a :%d \n",datastart);
-                             //           printf("b : %d \n",datasizes);
-                                for(int i=datastart;datasizes+datastart;i++)
-                                    printf("%c",*(packet+i));
+                                int tcpsize=av*4;
+
+                                datastart+=tcpsize;
+                                buf=(char*)malloc(16);
+                                inet_ntop(AF_INET,&tcps->source,buf,16);
+                                printf("TCP source port : %d \n",ntohs(tcps->source));
                                 free(buf);
+                                buf=(char*)malloc(16);
+                                inet_ntop(AF_INET,&tcps->destination,buf,16);
+
+                                printf("TCP destination port : %d\n",ntohs(tcps->destination));
+                                free(buf);
+
+                                int datasizes=ntohs(ips->total);
+                                printf("totla size : %d\n",datasizes);
+                                printf("ipsize : %d\n",ipsize);
+                                printf("tcpsize: %d\n",tcpsize);
+
+                                datasizes=datasizes-ipsize-tcpsize;
+                                if(datasizes<0 ||datasizes>header->len)
+                                    datasizes=0;
+                                printf("packet size : %d\n",header->len);
+                                packet+=ipsize+tcpsize+13;
+                                printf("data size : %d\n",datasizes);
+                                for(int i=0;i<datasizes;i++)
+                                {
+                                    if(isprint(packet[i]))
+                                        printf("%c",packet[i]);
+
+                                    else
+                                        printf(".");
+                                }
+                                // printf("%s",packet);
+                                cout<<endl<<"---------------------------"<<endl;
+
                             }
+
                         }
                     }
+                    break;
                 }
 
-                break;
+
 
             }
 
