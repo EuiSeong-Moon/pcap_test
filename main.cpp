@@ -60,13 +60,14 @@ int main(int argc,char** argv)
     bpf_u_int32 net;		/* Our IP */
     struct pcap_pkthdr *header;	/* The header that pcap gives us */
 
+    dev=argv[1];
     /* Define the device */
     // dev=argv[1];
     while(1)
     {
         /* The actual packet */
 
-        handle = pcap_open_live("ens33", BUFSIZ, 1, 1000, errbuf);//피캣오픈픈
+        handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);//피캣오픈픈
         if (handle == NULL) {
             fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
             return(2);
